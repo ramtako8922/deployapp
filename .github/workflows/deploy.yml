@@ -1,6 +1,6 @@
 name: deploy
 on:
-  push: 
+  push:
     branches:
       - master
 
@@ -14,57 +14,65 @@ jobs:
           - 6379:6379
 
     steps:
-     - name: instal redis cli
-       run: sudo apt-get update -y && sudo apt-get install redis-tools -y
+      - name: instal redis cli
+        run: sudo apt-get update -y && sudo apt-get install redis-tools -y
 
-     - name: print secrets
-       run: echo "${{ secrets.NAME }}"
+      - name: print secrets
+        run: echo "${{ secrets.NAME }}"
 
-     - name: test redis
-       run : redis-cli -h localhost -p 6379 ping
-     - name: Checkout code
-       uses: actions/checkout@v4
+      - name: test redis
+        run: redis-cli -h localhost -p 6379 ping
 
-     - name: Setup Node.js
-       uses: actions/setup-node@v4
-       with:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
           node-version: '18'
 
-     - name: Install dependencies
-       run: npm install
+      - name: Install dependencies
+        run: npm install
 
-     - name: Run tests
-       run: npm test
+      - name: Run tests
+        run: npm test
 
-     - name: Build project
-       run: npm run build
+      - name: Build project
+        run: npm run build
 
-     - name: Upload build artifacts
-       uses: actions/upload-artifact@v4
-       with:
-         path: public/
-
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: public/
 
   deploy:
-   if: ${{always()}} # This ensures the deploy job runs even if the build fails
-   permissions:
-     pages: write
-     id-token: write
-   runs-on: ubuntu-latest
-   needs: build
-   environment:
-     name: giithub-pages
-     url: ${{ steps.deploy.outputs.page_url }}
-   steps:
-        - name: deploy
-          id: deploy
-          uses: actions/deploy-pages@v4
-          
-        
+    if: ${{ always() }} # This ensures the deploy job runs even if the build fails
+    permissions:
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    needs: build
 
- 
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy-pages.outputs.page_url }}
 
-  
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deploy-pages
+        uses: actions/deploy-pages@v4
+
+
+
+
+
+
 
 
 

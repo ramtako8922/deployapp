@@ -16,9 +16,12 @@ jobs:
     steps:
      - name: instal redis cli
        run: sudo apt-get update -y && sudo apt-get install redis-tools -y
-       
+
      - name: print secrets
        run: echo "${{ secrets.NAME }}"
+
+     - name: test redis
+       run : redis-cli -h localhost -p 6379 ping
 
      - name: Setup Node.js
        uses: actions/setup-node@v4

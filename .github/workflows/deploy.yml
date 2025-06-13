@@ -8,5 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: print secrets
-        run: echo "${{ secrets.NAME }}" 
+        run: echo "${{ secrets.NAME }}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+            node-version: '18'
+    
       

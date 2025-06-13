@@ -1,77 +1,60 @@
-name: deploy
-on:
-  push:
-    branches:
-      - master
+name: Deploy
+
+on: push
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:latest
-        ports:
-          - 6379:6379
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [18, 20]
 
     steps:
-      - name: instal redis cli
-        run: sudo apt-get update -y && sudo apt-get install redis-tools -y
+      - name: Print variable
+        run: echo "${{ secrets.TOKEN_SECRECT }}"
 
-      - name: print secrets
-        run: echo "${{ secrets.NAME }}"
-
-      - name: test redis
-        run: redis-cli -h localhost -p 6379 ping
-
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: setup
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ matrix.node }}
 
-      - name: Install dependencies
+      - name: Instalar dependencias
         run: npm install
 
-      - name: Run tests
-        run: npm test
-
-      - name: Build project
+      - name: Run test
+        run: npm run test
+      
+      - name: Build page
         run: npm run build
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+  
+      - name: Upload artifact
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.node == 18 }}
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
-          path: public/
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
           path: public/
 
   deploy:
-    # Add a dependency to the build job
+    runs-on: ubuntu-latest
     needs: build
 
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
+      pages: write
+      id-token: write
 
-    # Deploy to the github-pages environment
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment-pages.outputs.page_url }}
 
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - name: Deploy
+        id: deployment-pages
         uses: actions/deploy-pages@v4
+
 
 
 

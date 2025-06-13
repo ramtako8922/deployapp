@@ -63,11 +63,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: github-pages
-          path: public
+          path: public/
 
       - name: Deploy to GitHub Pages
         id: deploy-pages
         uses: actions/deploy-pages@v4
+        with:
+         
+          folder: public
+ 
 
 
 

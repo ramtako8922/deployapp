@@ -3,9 +3,16 @@ on:
   push: 
     branches:
       - master
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+
     steps:
       - name: print secrets
         run: echo "${{ secrets.NAME }}"
@@ -13,6 +20,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-            node-version: '18'
-    
-      
+          node-version: '18'
+
+
